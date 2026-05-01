@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock the Facts!</title>
+  <style>
+    :root {
+      --bg: #101010;
+      --panel: #f7f3e8;
+      --ink: #181818;
+      --accent: #d72638;
+      --accent2: #f6c945;
+      --blue: #177ddc;
+      --red: #d72638;
+      --grid: #2a2a2a;
+      --muted: #6f6a60;
+      --cell: #fffaf0;
+      --cell2: #ece4d3;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(215,38,56,.22), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(246,201,69,.18), transparent 30%),
+        var(--bg);
+      color: var(--panel);
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    .app {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(2.1rem, 5vw, 4.5rem);
+      margin: 0;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 4px 4px 0 #000;
+      line-height: .9;
+    }
+
+    .subtitle {
+      font-family: Arial, sans-serif;
+      font-weight: 700;
+      letter-spacing: .5px;
+      color: #f3e9cf;
+      margin-top: 6px;
+    }
+
+    .controls {
+      background: #1b1b1b;
+      border: 2px solid #444;
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    }
+
+    button, select {
+      font-family: Arial, sans-serif;
+      font-weight: 800;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--accent2);
+      color: #111;
+      box-shadow: 0 4px 0 #8b6b11;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(2px); box-shadow: 0 2px 0 #8b6b11; }
+
+    select { background: #fff; color: #111; }
+
+    .game-wrap {
+      display: grid;
+      grid-template-columns: 92px 1fr 92px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .factor-track {
+      background: var(--panel);
+      color: var(--ink);
+      border: 4px solid #000;
+      border-radius: 18px;
+      padding: 10px 8px;
+      display: grid;
+      grid-template-rows: repeat(9, 1fr);
+      gap: 7px;
+      position: relative;
+      box-shadow: 8px 8px 0 rgba(0,0,0,.45);
+    }
+
+    .factor {
+      display: grid;
+      place-items: center;
+      border: 3px solid #111;
+      border-radius: 14px;
+      font-size: clamp(1.45rem, 3vw, 2.2rem);
+      background: #fffaf0;
+      cursor: pointer;
+      user-select: none;
+      min-height: 44px;
+    }
+
+    .factor:hover { outline: 4px solid var(--accent2); }
+    .factor.clipA { background: var(--red); color: #fff; }
+    .factor.clipB { background: var(--blue); color: #fff; }
+    .factor.both { background: linear-gradient(135deg, var(--red) 0 50%, var(--blue) 50% 100%); color: #fff; }
+
+    .board-panel {
+      background: var(--panel);
+      color: var(--ink);
+      border: 5px solid #000;
+      border-radius: 24px;
+      padding: 14px;
+      position: relative;
+      box-shadow: 10px 10px 0 rgba(0,0,0,.5);
+      overflow: hidden;
+    }
+
+    .board-panel:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, transparent 0 45%, rgba(0,0,0,.06) 45% 48%, transparent 48% 100%),
+        repeating-linear-gradient(-8deg, transparent 0 18px, rgba(0,0,0,.04) 18px 20px);
+      pointer-events: none;
+    }
+
+    .scorebar {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 10px;
+    }
+
+    .stat {
+      background: #111;
+      color: #fff;
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-weight: 900;
+      text-align: center;
+      border: 2px solid #444;
+    }
+
+    .stat strong { color: var(--accent2); }
+
+    .grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(44px, 1fr));
+      gap: 7px;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      font-size: clamp(1.35rem, 4vw, 2.75rem);
+      border: 3px solid var(--grid);
+      border-radius: 12px;
+      background: var(--cell);
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 900;
+    }
+
+    .cell.alt { background: var(--cell2); }
+    .cell.target { outline: 5px solid var(--accent2); }
+    .cell:hover { transform: scale(1.02); }
+
+    .cell.p1::after,
+    .cell.p2::after {
+      content: "";
+      width: 66%;
+      height: 66%;
+      border-radius: 50%;
+      position: absolute;
+      opacity: .88;
+      border: 4px solid #111;
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,.28);
+    }
+
+    .cell.p1::after { background: var(--red); }
+    .cell.p2::after { background: var(--blue); }
+
+    .cell.p1 span,
+    .cell.p2 span { position: relative; z-index: 2; color: #fff; text-shadow: 2px 2px 0 #000; }
+
+    .message {
+      margin-top: 14px;
+      background: #1d1d1d;
+      border: 2px solid #444;
+      border-left: 10px solid var(--accent);
+      border-radius: 16px;
+      padding: 13px 16px;
+      font-family: Arial, sans-serif;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .rules {
+      margin-top: 14px;
+      font-family: Arial, sans-serif;
+      background: rgba(255,255,255,.08);
+      padding: 14px 16px;
+      border-radius: 16px;
+      line-height: 1.4;
+    }
+
+    .rules h2 { font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; margin: 0 0 6px; letter-spacing: 1px; }
+
+    @media (max-width: 760px) {
+      header { grid-template-columns: 1fr; }
+      .controls { justify-content: flex-start; }
+      .game-wrap { grid-template-columns: 54px 1fr 54px; gap: 6px; }
+      .factor-track { padding: 7px 5px; gap: 5px; border-radius: 14px; }
+      .factor { min-height: 34px; font-size: 1.15rem; border-radius: 10px; border-width: 2px; }
+      .board-panel { padding: 8px; border-radius: 16px; }
+      .scorebar { grid-template-columns: 1fr 1fr; font-size: .8rem; }
+      .grid { gap: 4px; }
+      .cell { border-width: 2px; border-radius: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Rock the Facts!</h1>
+        <div class="subtitle">Move one clip. Make a product. Claim the square. First to 4 in a row wins.</div>
+      </div>
+      <div class="controls">
+        <select id="mode">
+          <option value="human">2 Players</option>
+          <option value="computer">Play Computer</option>
+        </select>
+        <button id="newGame">New Game</button>
+      </div>
+    </header>
+
+    <div class="game-wrap">
+      <div class="factor-track" id="leftTrack" aria-label="Paperclip A factor track"></div>
+      <main class="board-panel">
+        <div class="scorebar">
+          <div class="stat">Turn: <strong id="turnLabel">Player 1</strong></div>
+          <div class="stat">Clip A: <strong id="clipA">?</strong></div>
+          <div class="stat">Clip B: <strong id="clipB">?</strong></div>
+          <div class="stat">Product: <strong id="productLabel">?</strong></div>
+        </div>
+        <div class="grid" id="grid"></div>
+      </main>
+      <div class="factor-track" id="rightTrack" aria-label="Paperclip B factor track"></div>
+    </div>
+
+    <div class="message" id="message">Player 1: choose a number on the left and a number on the right. Then claim a matching product square.</div>
+
+    <section class="rules">
+      <h2>How to Play</h2>
+      <div>Pick one factor from each side. Multiply them. Click a matching product square to claim it. After the first turn, each player may change only one factor. First player to get 4 tokens in a row wins. Same factor is allowed, like 7 × 7.</div>
+    </section>
+  </div>
+
+  <script>
+    const boardNumbers = [
+      [1, 14, 5, 30, 7, 20, 81],
+      [2, 45, 16, 40, 27, 35, 10],
+      [15, 28, 42, 54, 48, 32, 21],
+      [25, 56, 63, 72, 64, 49, 36],
+      [18, 35, 40, 28, 45, 42, 24],
+      [3, 49, 32, 54, 56, 72, 12],
+      [4, 6, 8, 9, 48, 63, 64]
+    ];
+
+    const factors = [1,2,3,4,5,6,7,8,9];
+    const grid = document.getElementById('grid');
+    const leftTrack = document.getElementById('leftTrack');
+    const rightTrack = document.getElementById('rightTrack');
+    const turnLabel = document.getElementById('turnLabel');
+    const clipAEl = document.getElementById('clipA');
+    const clipBEl = document.getElementById('clipB');
+    const productLabel = document.getElementById('productLabel');
+    const message = document.getElementById('message');
+    const mode = document.getElementById('mode');
+
+    let clipA = null;
+    let clipB = null;
+    let currentPlayer = 1;
+    let claimed = Array(49).fill(0);
+    let lastMoveSet = { a: null, b: null };
+    let gameOver = false;
+
+    function init() {
+      grid.innerHTML = '';
+      leftTrack.innerHTML = '';
+      rightTrack.innerHTML = '';
+      claimed = Array(49).fill(0);
+      clipA = null;
+      clipB = null;
+      currentPlayer = 1;
+      lastMoveSet = { a: null, b: null };
+      gameOver = false;
+
+      factors.forEach(n => {
+        const left = document.createElement('div');
+        left.className = 'factor';
+        left.textContent = n;
+        left.dataset.value = n;
+        left.onclick = () => setClip('a', n);
+        leftTrack.appendChild(left);
+
+        const right = document.createElement('div');
+        right.className = 'factor';
+        right.textContent = n;
+        right.dataset.value = n;
+        right.onclick = () => setClip('b', n);
+        rightTrack.appendChild(right);
+      });
+
+      boardNumbers.flat().forEach((num, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell' + ((idx + Math.floor(idx / 7)) % 2 ? ' alt' : '');
+        cell.dataset.index = idx;
+        cell.dataset.value = num;
+        cell.innerHTML = `<span>${num}</span>`;
+        cell.onclick = () => claimCell(idx);
+        grid.appendChild(cell);
+      });
+
+      message.textContent = 'Player 1: choose a number on the left and a number on the right. Then claim a matching product square.';
+      updateUI();
+    }
+
+    function isFirstTurn() {
+      return lastMoveSet.a === null && lastMoveSet.b === null;
+    }
+
+    function setClip(which, value) {
+      if (gameOver) return;
+      if (mode.value === 'computer' && currentPlayer === 2) return;
+
+      const proposedA = which === 'a' ? value : clipA;
+      const proposedB = which === 'b' ? value : clipB;
+
+      if (!isFirstTurn()) {
+        const changedA = proposedA !== lastMoveSet.a;
+        const changedB = proposedB !== lastMoveSet.b;
+        if (changedA && changedB) {
+          message.textContent = 'After the first turn, you may move only one paperclip. Change just one side.';
+          return;
+        }
+        if (!changedA && !changedB) {
+          message.textContent = 'Move one paperclip to make a new product.';
+          return;
+        }
+      }
+
+      if (which === 'a') clipA = value;
+      if (which === 'b') clipB = value;
+      updateUI();
+    }
+
+    function currentProduct() {
+      if (!clipA || !clipB) return null;
+      return clipA * clipB;
+    }
+
+    function claimCell(idx) {
+      if (gameOver) return;
+      if (mode.value === 'computer' && currentPlayer === 2) return;
+      const product = currentProduct();
+      if (!product) {
+        message.textContent = 'Choose one factor from each side first.';
+        return;
+      }
+      if (claimed[idx]) {
+        message.textContent = 'That square is already claimed. Choose another matching product if one is open.';
+        return;
+      }
+      if (Number(grid.children[idx].dataset.value) !== product) {
+        message.textContent = `${clipA} × ${clipB} = ${product}. Click a square with ${product}.`;
+        return;
+      }
+      makeClaim(idx);
+    }
+
+    function makeClaim(idx) {
+      claimed[idx] = currentPlayer;
+      lastMoveSet = { a: clipA, b: clipB };
+      const winner = checkWinner(currentPlayer);
+      if (winner) {
+        gameOver = true;
+        message.textContent = `${playerName(currentPlayer)} wins with 4 in a row!`;
+        updateUI();
+        return;
+      }
+      currentPlayer = currentPlayer === 1 ? 2 : 1;
+      updateUI();
+      if (mode.value === 'computer' && currentPlayer === 2) {
+        setTimeout(computerMove, 550);
+      } else {
+        message.textContent = `${playerName(currentPlayer)}: move one paperclip, then claim the product.`;
+      }
+    }
+
+    function playerName(p) {
+      if (mode.value === 'computer' && p === 2) return 'Computer';
+      return `Player ${p}`;
+    }
+
+    function updateUI() {
+      turnLabel.textContent = playerName(currentPlayer);
+      clipAEl.textContent = clipA || '?';
+      clipBEl.textContent = clipB || '?';
+      productLabel.textContent = currentProduct() || '?';
+
+      document.querySelectorAll('#leftTrack .factor').forEach(el => {
+        const n = Number(el.dataset.value);
+        el.className = 'factor' + (n === clipA ? ' clipA' : '');
+      });
+      document.querySelectorAll('#rightTrack .factor').forEach(el => {
+        const n = Number(el.dataset.value);
+        el.className = 'factor' + (n === clipB ? ' clipB' : '');
+      });
+
+      const product = currentProduct();
+      [...grid.children].forEach((cell, idx) => {
+        cell.classList.toggle('p1', claimed[idx] === 1);
+        cell.classList.toggle('p2', claimed[idx] === 2);
+        cell.classList.toggle('target', !claimed[idx] && product && Number(cell.dataset.value) === product);
+      });
+    }
+
+    function checkWinner(player) {
+      const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          for (const [dr, dc] of dirs) {
+            let ok = true;
+            for (let k = 0; k < 4; k++) {
+              const rr = r + dr * k;
+              const cc = c + dc * k;
+              if (rr < 0 || rr >= 7 || cc < 0 || cc >= 7 || claimed[rr * 7 + cc] !== player) ok = false;
+            }
+            if (ok) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function possibleMoves() {
+      const moves = [];
+      for (const side of ['a','b']) {
+        for (const n of factors) {
+          const newA = side === 'a' ? n : clipA;
+          const newB = side === 'b' ? n : clipB;
+          if (!newA || !newB) continue;
+          if (!isFirstTurn() && newA === lastMoveSet.a && newB === lastMoveSet.b) continue;
+          if (!isFirstTurn() && newA !== lastMoveSet.a && newB !== lastMoveSet.b) continue;
+          const prod = newA * newB;
+          boardNumbers.flat().forEach((value, idx) => {
+            if (value === prod && !claimed[idx]) moves.push({ side, n, a: newA, b: newB, idx, prod });
+          });
+        }
+      }
+      return moves;
+    }
+
+    function computerMove() {
+      if (gameOver) return;
+      const moves = possibleMoves();
+      if (!moves.length) {
+        gameOver = true;
+        message.textContent = 'No legal moves left. Game over!';
+        updateUI();
+        return;
+      }
+
+      let best = null;
+      for (const m of moves) {
+        const temp = claimed.slice();
+        temp[m.idx] = 2;
+        if (wouldWin(temp, 2)) { best = m; break; }
+      }
+      if (!best) {
+        for (const m of moves) {
+          const temp = claimed.slice();
+          temp[m.idx] = 1;
+          if (wouldWin(temp, 1)) { best = m; break; }
+        }
+      }
+      if (!best) {
+        best = moves.sort((m1, m2) => centerScore(m2.idx) - centerScore(m1.idx))[0];
+      }
+
+      clipA = best.a;
+      clipB = best.b;
+      makeClaim(best.idx);
+    }
+
+    function wouldWin(tempClaimed, player) {
+      const old = claimed;
+      claimed = tempClaimed;
+      const result = checkWinner(player);
+      claimed = old;
+      return result;
+    }
+
+    function centerScore(idx) {
+      const r = Math.floor(idx / 7), c = idx % 7;
+      return 10 - (Math.abs(3-r) + Math.abs(3-c));
+    }
+
+    document.getElementById('newGame').onclick = init;
+    mode.onchange = init;
+    init();
+  </script>
+</body>
+</html>
