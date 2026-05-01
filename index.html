@@ -493,14 +493,11 @@
     .win-title.red { color: var(--red); }
     .win-title.blue { color: var(--blue); }
 
-    .play-again {
-      margin-top: 8px;
-      color: var(--yellow);
-      font-weight: 950;
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-shadow: 0 0 10px rgba(255,230,109,.45);
+    .win-new-game {
+      margin-top: 10px;
+      font-size: .9rem;
+      padding: 8px 14px;
+      border-radius: 10px;
     }
 
     .rock-wrap {
@@ -702,7 +699,7 @@
       <div class="win-card">
         <div>
           <h2 class="win-title" id="winTitle">Red Wins!</h2>
-          <div class="play-again">Click NEW GAME to play again</div>
+          <button class="win-new-game" id="winNewGame">New Game</button>
           <div class="rock-wrap">
             <div>
               <div class="happy-rock" aria-hidden="true">
@@ -1012,6 +1009,7 @@
     }
 
     document.getElementById('newGame').onclick = init;
+    document.getElementById('winNewGame').onclick = init;
     document.getElementById('rulesBtn').onclick = () => rulesOverlay.classList.add('show');
     document.getElementById('closeRules').onclick = () => rulesOverlay.classList.remove('show');
     rulesOverlay.onclick = (e) => {
