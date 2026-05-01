@@ -128,8 +128,10 @@
     }
 
     .factor:hover { outline: 4px solid var(--accent2); }
-    .factor.clipA { background: var(--red); color: #fff; }
-    .factor.clipB { background: var(--blue); color: #fff; }
+    .factor.clipA,
+    .factor.clipB { color: #fff; }
+    .factor.turn-red { background: var(--red); color: #fff; }
+    .factor.turn-blue { background: var(--blue); color: #fff; }
     .factor.both { background: linear-gradient(135deg, var(--red) 0 50%, var(--blue) 50% 100%); color: #fff; }
 
     .board-panel {
@@ -231,6 +233,45 @@
       line-height: 1.35;
     }
 
+    .wrong-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.35);
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .wrong-overlay.show {
+      display: grid;
+      animation: flashWrong 2s ease-out forwards;
+    }
+
+    .big-x {
+      width: min(42vw, 320px);
+      height: min(42vw, 320px);
+      border-radius: 50%;
+      background: var(--red);
+      border: 12px solid #fff;
+      box-shadow: 0 0 0 10px #111, 0 18px 45px rgba(0,0,0,.55);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+      font-size: min(30vw, 230px);
+      line-height: 1;
+      text-shadow: 7px 7px 0 #111;
+      transform: rotate(-8deg);
+    }
+
+    @keyframes flashWrong {
+      0% { opacity: 0; transform: scale(.75); }
+      12% { opacity: 1; transform: scale(1.04); }
+      75% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(.9); }
+    }
+
     .rules {
       margin-top: 14px;
       font-family: Arial, sans-serif;
@@ -287,6 +328,10 @@
 
     <div class="message" id="message">Player 1: choose a number on the left and a number on the right. Then claim a matching product square.</div>
 
+    <div class="wrong-overlay" id="wrongOverlay" aria-hidden="true">
+      <div class="big-x">×</div>
+    </div>
+
     <section class="rules">
       <h2>How to Play</h2>
       <div>Pick one factor from each side. Mentally multiply them. Click the product square you think is correct. If you click the wrong product, you lose your turn. After the first turn, each player may change only one factor. First player to get 4 tokens in a row wins. Same factor is allowed, like 7 × 7.</div>
@@ -314,6 +359,7 @@
     const productLabel = document.getElementById('productLabel');
     const message = document.getElementById('message');
     const mode = document.getElementById('mode');
+    const wrongOverlay = document.getElementById('wrongOverlay');
 
     let clipA = null;
     let clipB = null;
@@ -410,17 +456,25 @@
         return;
       }
       if (Number(grid.children[idx].dataset.value) !== product) {
+        showWrongX();
         const missedPlayer = currentPlayer;
         lastMoveSet = { a: clipA, b: clipB };
         currentPlayer = currentPlayer === 1 ? 2 : 1;
         updateUI();
         message.textContent = `${playerName(missedPlayer)} clicked the wrong product and loses the turn. ${playerName(currentPlayer)}: move one paperclip, then claim a square.`;
         if (mode.value === 'computer' && currentPlayer === 2) {
-          setTimeout(computerMove, 650);
+          setTimeout(computerMove, 2000);
         }
         return;
       }
       makeClaim(idx);
+    }
+
+    function showWrongX() {
+      wrongOverlay.classList.remove('show');
+      void wrongOverlay.offsetWidth;
+      wrongOverlay.classList.add('show');
+      setTimeout(() => wrongOverlay.classList.remove('show'), 2000);
     }
 
     function makeClaim(idx) {
@@ -453,13 +507,14 @@
       clipBEl.textContent = clipB || '?';
       productLabel.textContent = clipA && clipB ? 'Hidden' : '?';
 
+      const turnColorClass = currentPlayer === 1 ? ' turn-red' : ' turn-blue';
       document.querySelectorAll('#leftTrack .factor').forEach(el => {
         const n = Number(el.dataset.value);
-        el.className = 'factor' + (n === clipA ? ' clipA' : '');
+        el.className = 'factor' + (n === clipA ? turnColorClass : '');
       });
       document.querySelectorAll('#rightTrack .factor').forEach(el => {
         const n = Number(el.dataset.value);
-        el.className = 'factor' + (n === clipB ? ' clipB' : '');
+        el.className = 'factor' + (n === clipB ? turnColorClass : '');
       });
 
       const product = currentProduct();
