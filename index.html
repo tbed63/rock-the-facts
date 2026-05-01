@@ -750,6 +750,7 @@
 
     const boardSize = 6;
     const winLength = 4;
+    let currentBoard = [];
     const factors = [1,2,3,4,5,6,7,8,9];
     const grid = document.getElementById('grid');
     const leftTrack = document.getElementById('leftTrack');
@@ -779,6 +780,7 @@
       grid.innerHTML = '';
       leftTrack.innerHTML = '';
       rightTrack.innerHTML = '';
+      currentBoard = makeShuffledBoard();
       claimed = Array(boardSize * boardSize).fill(0);
       clipA = null;
       clipB = null;
@@ -805,7 +807,7 @@
         rightTrack.appendChild(right);
       });
 
-      boardNumbers.flat().forEach((num, idx) => {
+      currentBoard.flat().forEach((num, idx) => {
         const cell = document.createElement('div');
         cell.className = 'cell' + ((idx + Math.floor(idx / boardSize)) % 2 ? ' alt' : '');
         cell.dataset.index = idx;
@@ -818,6 +820,19 @@
 
       message.textContent = 'Player 1: choose one left factor and one right factor. Then claim the product.';
       updateUI();
+    }
+
+    function makeShuffledBoard() {
+      const flat = boardNumbers.flat();
+      for (let i = flat.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [flat[i], flat[j]] = [flat[j], flat[i]];
+      }
+      const shuffled = [];
+      for (let r = 0; r < boardSize; r++) {
+        shuffled.push(flat.slice(r * boardSize, r * boardSize + boardSize));
+      }
+      return shuffled;
     }
 
     function isFirstTurn() {
@@ -973,7 +988,7 @@
           if (!isFirstTurn() && newA === lastMoveSet.a && newB === lastMoveSet.b) continue;
           if (!isFirstTurn() && newA !== lastMoveSet.a && newB !== lastMoveSet.b) continue;
           const prod = newA * newB;
-          boardNumbers.flat().forEach((value, idx) => {
+          currentBoard.flat().forEach((value, idx) => {
             if (value === prod && !claimed[idx]) moves.push({ side, n, a: newA, b: newB, idx, prod });
           });
         }
@@ -1019,6 +1034,19 @@
       const result = checkWinner(player);
       claimed = old;
       return result;
+    }
+
+    function makeDistortion(amount = 70) {
+      const curve = new Float32Array(44100);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < curve.length; i++) {
+        const x = i * 2 / curve.length - 1;
+        curve[i] = (3 + amount) * x * 20 * deg / (Math.PI + amount * Math.abs(x));
+      }
+      const shaper = audioCtx.createWaveShaper();
+      shaper.curve = curve;
+      shaper.oversample = '4x';
+      return shaper;
     }
 
     function centerScore(idx) {
