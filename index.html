@@ -42,14 +42,29 @@
       inset: 0;
       background:
         linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
-      background-size: 32px 32px;
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        repeating-linear-gradient(107deg, transparent 0 22px, rgba(255,255,255,.035) 22px 24px, transparent 24px 54px),
+        repeating-linear-gradient(-18deg, transparent 0 34px, rgba(255,45,85,.045) 34px 36px, transparent 36px 72px);
+      background-size: 32px 32px, 32px 32px, auto, auto;
       pointer-events: none;
       mask-image: radial-gradient(circle, black 0 58%, transparent 86%);
     }
 
+    body:after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, transparent 0 18%, rgba(255,255,255,.05) 18.3%, transparent 18.8% 100%),
+        linear-gradient(48deg, transparent 0 68%, rgba(24,182,255,.055) 68.2%, transparent 68.8% 100%),
+        radial-gradient(circle at 20% 84%, rgba(255,230,109,.08), transparent 12%);
+      opacity: .85;
+      mix-blend-mode: screen;
+    }
+
     .app {
-      width: min(860px, 100%);
+      width: min(1075px, 100%);
       margin: 0 auto;
     }
 
@@ -64,7 +79,7 @@
     h1 {
       margin: 0;
       font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-      font-size: clamp(1.85rem, 4vw, 3.1rem);
+      font-size: clamp(1.35rem, 3vw, 2.3rem);
       line-height: .86;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -79,7 +94,7 @@
     .brand-subtitle {
       margin-top: 4px;
       color: var(--yellow);
-      font-size: .8rem;
+      font-size: .6rem;
       font-weight: 950;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -89,7 +104,7 @@
     .tagline {
       margin-top: 2px;
       color: var(--muted);
-      font-size: .72rem;
+      font-size: .54rem;
       font-weight: 800;
     }
 
@@ -108,10 +123,10 @@
       font-family: Arial, Helvetica, sans-serif;
       font-weight: 950;
       border: 0;
-      border-radius: 10px;
-      padding: 7px 9px;
+      border-radius: 8px;
+      padding: 5px 7px;
       cursor: pointer;
-      font-size: .78rem;
+      font-size: .6rem;
     }
 
     button {
@@ -126,8 +141,8 @@
 
     .game-wrap {
       display: grid;
-      grid-template-columns: 48px minmax(360px, 1fr) 48px;
-      gap: 7px;
+      grid-template-columns: 36px minmax(470px, 1fr) 36px;
+      gap: 6px;
       align-items: stretch;
     }
 
@@ -135,10 +150,10 @@
       background: linear-gradient(180deg, rgba(16,16,39,.96), rgba(25,25,62,.96));
       border: 1px solid rgba(255,255,255,.24);
       border-radius: 14px;
-      padding: 6px 4px;
+      padding: 4px 3px;
       display: grid;
       grid-template-rows: repeat(9, 1fr);
-      gap: 4px;
+      gap: 3px;
       box-shadow: 0 0 20px rgba(24,182,255,.13), inset 0 0 18px rgba(255,255,255,.05);
     }
 
@@ -148,13 +163,13 @@
       border: 1px solid rgba(255,255,255,.28);
       border-radius: 10px;
       font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-      font-size: clamp(.95rem, 1.9vw, 1.25rem);
+      font-size: clamp(.72rem, 1.45vw, .95rem);
       letter-spacing: 1px;
       background: rgba(255,255,255,.07);
       color: #fff;
       cursor: pointer;
       user-select: none;
-      min-height: 27px;
+      min-height: 20px;
       text-shadow: 2px 2px 0 #000;
       transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
     }
@@ -183,7 +198,7 @@
       background: linear-gradient(135deg, rgba(16,16,39,.96), rgba(23,23,53,.96));
       border: 1px solid rgba(255,255,255,.26);
       border-radius: 18px;
-      padding: 8px;
+      padding: 6px;
       box-shadow:
         0 0 0 1px rgba(24,182,255,.18),
         0 15px 34px rgba(0,0,0,.45),
@@ -191,16 +206,28 @@
     }
 
     .board-panel:before {
-      content: "⚡ × 7 × 8  ♫  6 × 9  ★";
+      content: "⚡ × 7 × 8  ♫  6 × 9  ★  //  ROCK";
       position: absolute;
       inset: auto 0 -9px 0;
       font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
       font-size: clamp(1.8rem, 5vw, 4rem);
       letter-spacing: 8px;
-      color: rgba(255,255,255,.035);
+      color: rgba(255,255,255,.05);
       text-align: center;
       white-space: nowrap;
       pointer-events: none;
+    }
+
+    .board-panel:after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(163deg, transparent 0 21%, rgba(255,255,255,.06) 21.4%, transparent 22% 100%),
+        linear-gradient(23deg, transparent 0 58%, rgba(255,45,85,.09) 58.2%, transparent 59% 100%),
+        repeating-linear-gradient(-7deg, transparent 0 16px, rgba(255,255,255,.035) 16px 17px, transparent 17px 34px);
+      pointer-events: none;
+      opacity: .9;
     }
 
     .scorebar {
@@ -210,13 +237,13 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 5px;
       margin-bottom: 6px;
-      font-size: .68rem;
+      font-size: .52rem;
     }
 
     .stat {
       background: rgba(0,0,0,.36);
       color: #eaf6ff;
-      padding: 5px 5px;
+      padding: 4px 4px;
       border-radius: 10px;
       font-weight: 950;
       text-align: center;
@@ -234,8 +261,8 @@
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: repeat(6, minmax(46px, 1fr));
-      gap: 5px;
+      grid-template-columns: repeat(6, minmax(58px, 1fr));
+      gap: 4px;
     }
 
     .cell {
@@ -247,13 +274,13 @@
       cursor: pointer;
       user-select: none;
       font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-      font-size: clamp(1.15rem, 3.3vw, 2.05rem);
+      font-size: clamp(.9rem, 2.45vw, 1.55rem);
       letter-spacing: 1px;
       font-weight: 950;
       color: #f8fbff;
       text-shadow: 2px 2px 0 #000;
       border: 1px solid rgba(255,255,255,.18);
-      border-radius: 12px;
+      border-radius: 9px;
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.12), transparent 28%),
         linear-gradient(135deg, var(--cell), #101026);
@@ -314,8 +341,8 @@
       border: 1px solid rgba(255,255,255,.18);
       border-left: 7px solid var(--green);
       border-radius: 14px;
-      padding: 8px 10px;
-      font-size: .82rem;
+      padding: 6px 9px;
+      font-size: .62rem;
       font-weight: 950;
       line-height: 1.2;
       box-shadow: 0 0 20px rgba(49,255,159,.11);
