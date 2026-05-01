@@ -687,6 +687,7 @@
               <option value="human">2 Players</option>
               <option value="computer">Computer</option>
             </select>
+            <button id="musicBtn">Music</button>
             <button id="rulesBtn">Rules</button>
             <button id="newGame">New</button>
           </div>
@@ -764,6 +765,14 @@
     const rulesOverlay = document.getElementById('rulesOverlay');
     const winOverlay = document.getElementById('winOverlay');
     const winTitle = document.getElementById('winTitle');
+    const musicBtn = document.getElementById('musicBtn');
+
+    let audioCtx = null;
+    let masterGain = null;
+    let musicTimer = null;
+    let musicPlaying = false;
+    let step = 0;
+    let lastHoverSound = 0;
 
     let clipA = null;
     let clipB = null;
@@ -790,6 +799,7 @@
         left.textContent = n;
         left.dataset.value = n;
         left.onclick = () => setClip('a', n);
+        left.onmouseenter = playHoverClick;
         leftTrack.appendChild(left);
 
         const right = document.createElement('div');
@@ -797,6 +807,7 @@
         right.textContent = n;
         right.dataset.value = n;
         right.onclick = () => setClip('b', n);
+        right.onmouseenter = playHoverClick;
         rightTrack.appendChild(right);
       });
 
@@ -807,6 +818,7 @@
         cell.dataset.value = num;
         cell.innerHTML = `<span>${num}</span>`;
         cell.onclick = () => claimCell(idx);
+        cell.onmouseenter = playHoverClick;
         grid.appendChild(cell);
       });
 
@@ -821,6 +833,7 @@
     function setClip(which, value) {
       if (gameOver) return;
       if (mode.value === 'computer' && currentPlayer === 2) return;
+      playSelectClick();
 
       const proposedA = which === 'a' ? value : clipA;
       const proposedB = which === 'b' ? value : clipB;
@@ -861,6 +874,7 @@
         return;
       }
       if (Number(grid.children[idx].dataset.value) !== product) {
+        playWrongSound();
         showWrongX();
         const missedPlayer = currentPlayer;
         lastMoveSet = { a: clipA, b: clipB };
@@ -883,12 +897,14 @@
     }
 
     function makeClaim(idx) {
+      playClaimSound();
       claimed[idx] = currentPlayer;
       lastMoveSet = { a: clipA, b: clipB };
       if (checkWinner(currentPlayer)) {
         gameOver = true;
         message.textContent = `${playerName(currentPlayer)} wins with 4 in a row!`;
         showWinScreen(currentPlayer);
+        playVictorySong();
         updateUI();
         return;
       }
@@ -1016,8 +1032,249 @@
       return 10 - (Math.abs((boardSize - 1) / 2 - r) + Math.abs((boardSize - 1) / 2 - c));
     }
 
+    function setupAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.16;
+      masterGain.connect(audioCtx.destination);
+    }
+
+    async function unlockAudio() {
+      setupAudio();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+    }
+
+    function playTone(freq, startTime, duration, type = 'sine', volume = 0.18, destination = masterGain) {
+      if (!audioCtx || !destination) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(volume, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.connect(gain).connect(destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.02);
+    }
+
+    function playHoverClick() {
+      if (!audioCtx || audioCtx.state !== 'running') return;
+      const nowMs = performance.now();
+      if (nowMs - lastHoverSound < 55) return;
+      lastHoverSound = nowMs;
+      const t = audioCtx.currentTime;
+      playTone(900, t, 0.025, 'triangle', 0.045);
+    }
+
+    async function playSelectClick() {
+      await unlockAudio();
+      const t = audioCtx.currentTime;
+      playTone(520, t, 0.045, 'square', 0.09);
+      playTone(780, t + 0.03, 0.055, 'triangle', 0.07);
+    }
+
+    async function playClaimSound() {
+      await unlockAudio();
+      const t = audioCtx.currentTime;
+      playTone(392, t, 0.055, 'triangle', 0.08);
+      playTone(587.33, t + 0.045, 0.07, 'triangle', 0.08);
+      playTone(783.99, t + 0.09, 0.09, 'triangle', 0.08);
+    }
+
+    async function playWrongSound() {
+      await unlockAudio();
+      const t = audioCtx.currentTime;
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(900, t);
+      filter.frequency.exponentialRampToValueAtTime(140, t + 0.42);
+      filter.connect(masterGain);
+      playTone(220, t, 0.18, 'sawtooth', 0.18, filter);
+      playTone(185, t + 0.12, 0.22, 'sawtooth', 0.16, filter);
+      playTone(138.59, t + 0.25, 0.28, 'square', 0.12, filter);
+    }
+
+    function playWinKick(time) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(130, time);
+      osc.frequency.exponentialRampToValueAtTime(48, time + 0.16);
+      gain.gain.setValueAtTime(0.8, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+      osc.connect(gain).connect(masterGain);
+      osc.start(time);
+      osc.stop(time + 0.22);
+    }
+
+    async function playVictorySong() {
+      await unlockAudio();
+      const wasMusicPlaying = musicPlaying;
+      if (musicPlaying) {
+        clearInterval(musicTimer);
+        musicTimer = null;
+      }
+      const t0 = audioCtx.currentTime + 0.03;
+      const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 523.25, 659.25, 783.99];
+      const rhythm = [0, .18, .36, .54, .82, 1.00, 1.18, 1.45];
+      const guitarBus = makeDistortion(80);
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1400;
+      filter.Q.value = 2.4;
+      guitarBus.connect(filter).connect(masterGain);
+
+      rhythm.forEach((offset, i) => {
+        const time = t0 + offset;
+        if (i === 0 || i === 3 || i === 6) playWinKick(time);
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc1.type = 'sawtooth';
+        osc2.type = 'square';
+        osc1.frequency.setValueAtTime(notes[i], time);
+        osc2.frequency.setValueAtTime(notes[i] * 1.01, time);
+        gain.gain.setValueAtTime(0.12, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.26);
+        osc1.connect(gain).connect(guitarBus);
+        osc2.connect(gain).connect(guitarBus);
+        osc1.start(time);
+        osc2.start(time);
+        osc1.stop(time + 0.29);
+        osc2.stop(time + 0.29);
+      });
+
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        playTone(freq, t0 + 1.72, 0.7, 'triangle', 0.08);
+      });
+
+      if (wasMusicPlaying) {
+        setTimeout(() => {
+          if (gameOver) return;
+          musicLoop();
+          musicTimer = setInterval(musicLoop, 1200);
+        }, 2600);
+      }
+    }
+
+    function playKick(time) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(110, time);
+      osc.frequency.exponentialRampToValueAtTime(42, time + 0.12);
+      gain.gain.setValueAtTime(0.9, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+      osc.connect(gain).connect(masterGain);
+      osc.start(time);
+      osc.stop(time + 0.2);
+    }
+
+    function playHat(time) {
+      const bufferSize = audioCtx.sampleRate * 0.05;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = audioCtx.createBufferSource();
+      const filter = audioCtx.createBiquadFilter();
+      const gain = audioCtx.createGain();
+      noise.buffer = buffer;
+      filter.type = 'highpass';
+      filter.frequency.value = 7000;
+      gain.gain.setValueAtTime(0.13, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.045);
+      noise.connect(filter).connect(gain).connect(masterGain);
+      noise.start(time);
+      noise.stop(time + 0.055);
+    }
+
+    function playBass(time, freq) {
+      const osc = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(420, time);
+      filter.frequency.exponentialRampToValueAtTime(120, time + 0.18);
+      gain.gain.setValueAtTime(0.22, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+      osc.connect(filter).connect(gain).connect(masterGain);
+      osc.start(time);
+      osc.stop(time + 0.24);
+    }
+
+    function makeDistortion(amount = 70) {
+      const curve = new Float32Array(44100);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < curve.length; i++) {
+        const x = i * 2 / curve.length - 1;
+        curve[i] = (3 + amount) * x * 20 * deg / (Math.PI + amount * Math.abs(x));
+      }
+      const shaper = audioCtx.createWaveShaper();
+      shaper.curve = curve;
+      shaper.oversample = '4x';
+      return shaper;
+    }
+
+    function playGuitarHit(time, freq) {
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const distortion = makeDistortion(95);
+      const filter = audioCtx.createBiquadFilter();
+      const gain = audioCtx.createGain();
+      osc1.type = 'sawtooth';
+      osc2.type = 'square';
+      osc1.frequency.setValueAtTime(freq, time);
+      osc2.frequency.setValueAtTime(freq * 1.005, time);
+      filter.type = 'bandpass';
+      filter.frequency.value = 1200;
+      filter.Q.value = 4;
+      gain.gain.setValueAtTime(0.12, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.26);
+      osc1.connect(distortion);
+      osc2.connect(distortion);
+      distortion.connect(filter).connect(gain).connect(masterGain);
+      osc1.start(time);
+      osc2.start(time);
+      osc1.stop(time + 0.28);
+      osc2.stop(time + 0.28);
+    }
+
+    function musicLoop() {
+      if (!musicPlaying || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const beat = 0.155;
+      const bassline = [55, 55, 65.41, 55, 73.42, 65.41, 55, 49];
+      for (let i = 0; i < 8; i++) {
+        const t = now + i * beat;
+        const s = (step + i) % 16;
+        if (s % 4 === 0) playKick(t);
+        if (s % 2 === 1) playHat(t);
+        if (s % 4 === 0 || s === 6 || s === 14) playBass(t, bassline[s % bassline.length]);
+        if (s === 3 || s === 7 || s === 11 || s === 15) playGuitarHit(t, [220, 246.94, 196, 174.61][Math.floor(s / 4)]);
+      }
+      step = (step + 8) % 16;
+    }
+
+    async function toggleMusic() {
+      await unlockAudio();
+      musicPlaying = !musicPlaying;
+      musicBtn.textContent = musicPlaying ? 'Music On' : 'Music';
+      if (musicPlaying) {
+        step = 0;
+        musicLoop();
+        musicTimer = setInterval(musicLoop, 1200);
+      } else {
+        clearInterval(musicTimer);
+        musicTimer = null;
+      }
+    }
+
     document.getElementById('newGame').onclick = init;
     document.getElementById('winNewGame').onclick = init;
+    musicBtn.onclick = toggleMusic;
     document.getElementById('rulesBtn').onclick = () => rulesOverlay.classList.add('show');
     document.getElementById('closeRules').onclick = () => rulesOverlay.classList.remove('show');
     rulesOverlay.onclick = (e) => {
