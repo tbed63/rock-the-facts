@@ -114,38 +114,54 @@
 
     .controls {
       position: absolute;
-      top: clamp(48px, 5.5vh, 76px);
-      right: clamp(24px, 3.5vw, 56px);
+      top: clamp(12px, 2vh, 24px);
+      right: clamp(18px, 2.4vw, 42px);
       z-index: 8;
       display: flex;
-      gap: clamp(8px, 1vw, 14px);
+      gap: clamp(14px, 1.6vw, 24px);
       align-items: center;
+      background: rgba(0,0,0,.16);
+      border-radius: 999px;
+      padding: 6px 10px;
+      backdrop-filter: blur(2px);
     }
 
     button, select {
-      border: 2px solid rgba(255,255,255,.95);
-      border-radius: 12px;
-      min-height: clamp(38px, 5.5vh, 56px);
-      padding: 8px 16px;
+      border: 0;
+      border-radius: 0;
+      min-height: auto;
+      padding: 2px 0;
       font-weight: 950;
-      font-size: clamp(1rem, 1.65vw, 1.6rem);
+      font-size: clamp(.72rem, 1vw, 1rem);
       cursor: pointer;
       font-family: Arial, Helvetica, sans-serif;
       text-transform: uppercase;
-      letter-spacing: .5px;
-      color: #fff;
-      background: #10101c;
-      box-shadow: 5px 7px 0 #000, 0 0 16px rgba(255,255,255,.12);
+      letter-spacing: .8px;
+      color: rgba(255,255,255,.88);
+      background: transparent;
+      box-shadow: none;
+      text-shadow: 2px 2px 0 #000, 0 0 8px rgba(255,255,255,.18);
+      transition: transform .12s ease, color .12s ease, text-shadow .12s ease, opacity .12s ease;
     }
 
     select {
       appearance: none;
       -webkit-appearance: none;
       text-align: center;
+      width: auto;
     }
 
-    button:hover, select:hover { transform: translateY(-1px); }
-    button:active, select:active { transform: translateY(2px); box-shadow: 3px 4px 0 #000; }
+    button:hover, select:hover {
+      transform: translateY(-2px) scale(1.05);
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 #000, 0 0 14px rgba(255,230,109,.7);
+    }
+
+    button:active, select:active {
+      transform: translateY(1px) scale(.96);
+      color: var(--green);
+      text-shadow: 2px 2px 0 #000, 0 0 14px rgba(49,255,159,.7);
+    }
 
     .game-stage {
       position: absolute;
@@ -481,8 +497,8 @@
       .brand-subtitle { font-size: clamp(.85rem, 1.35vw, 1.25rem); }
       .game-stage { width: min(45vw, 64vh, 640px); transform: translate(-34%, -44%); }
       .kids-img { width: clamp(280px, 31vw, 480px); }
-      .controls { top: 42px; right: 24px; }
-      button, select { font-size: clamp(.86rem, 1.25vw, 1.2rem); min-height: 34px; }
+      .controls { top: 10px; right: 18px; }
+      button, select { font-size: clamp(.68rem, .95vw, .9rem); min-height: auto; }
     }
   </style>
 </head>
