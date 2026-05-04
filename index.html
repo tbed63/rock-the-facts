@@ -35,9 +35,10 @@
       font-family: Arial, Helvetica, sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at 50% 92%, rgba(0,0,0,.92), transparent 20%),
-        radial-gradient(circle at 46% 0%, rgba(255,255,255,.28), transparent 16%),
-        linear-gradient(90deg, #ff2855 0 38%, #0b0c1c 38% 50%, #21b7f4 50% 100%);
+        radial-gradient(circle at 18% 18%, rgba(255,45,85,.24), transparent 28%),
+        radial-gradient(circle at 82% 20%, rgba(24,182,255,.24), transparent 30%),
+        radial-gradient(circle at 55% 105%, rgba(168,85,247,.18), transparent 38%),
+        linear-gradient(135deg, #03040b 0%, #08091a 42%, #050612 100%);
     }
 
     body:before {
@@ -46,15 +47,29 @@
       inset: 0;
       pointer-events: none;
       background:
-        linear-gradient(90deg, rgba(255,255,255,.45) 1px, transparent 1px),
-        linear-gradient(rgba(255,255,255,.45) 1px, transparent 1px),
-        repeating-linear-gradient(-18deg, transparent 0 58px, rgba(255,255,255,.75) 58px 60px, transparent 60px 120px),
-        repeating-linear-gradient(28deg, transparent 0 70px, rgba(255,45,85,.85) 70px 72px, transparent 72px 140px),
-        repeating-linear-gradient(-28deg, transparent 0 90px, rgba(24,182,255,.75) 90px 92px, transparent 92px 160px);
-      background-size: 40px 40px, 40px 40px, auto, auto, auto;
-      opacity: .58;
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        repeating-linear-gradient(-14deg, transparent 0 42px, rgba(255,255,255,.055) 42px 44px, transparent 44px 88px),
+        repeating-linear-gradient(26deg, transparent 0 70px, rgba(255,45,85,.075) 70px 72px, transparent 72px 142px),
+        repeating-linear-gradient(-28deg, transparent 0 92px, rgba(24,182,255,.075) 92px 94px, transparent 94px 164px),
+        radial-gradient(circle at 12% 78%, rgba(255,230,109,.06), transparent 18%);
+      background-size: 38px 38px, 38px 38px, auto, auto, auto, auto;
+      opacity: .95;
       mix-blend-mode: screen;
       z-index: 0;
+    }
+
+    body:after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(150deg, transparent 0 22%, rgba(255,255,255,.055) 22.3%, transparent 23% 100%),
+        linear-gradient(35deg, transparent 0 62%, rgba(24,182,255,.06) 62.2%, transparent 63% 100%),
+        linear-gradient(-20deg, transparent 0 74%, rgba(255,45,85,.065) 74.2%, transparent 75% 100%);
+      opacity: .72;
     }
 
     .screen {
