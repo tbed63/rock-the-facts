@@ -80,16 +80,6 @@
       filter: drop-shadow(0 15px 20px rgba(0,0,0,.55));
     }
 
-    .logo-fallback {
-      display: none;
-      font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-      font-size: clamp(2.4rem, 5vw, 4.6rem);
-      line-height: .82;
-      text-transform: uppercase;
-      color: white;
-      text-shadow: 4px 4px 0 #000, 0 0 18px rgba(24,182,255,.55);
-    }
-
     .brand-subtitle {
       margin-top: clamp(8px, 1.2vh, 16px);
       color: var(--yellow);
@@ -484,8 +474,7 @@
 <body>
   <div class="screen">
     <section class="logo-area">
-      <img class="logo-img" src="rock-logo.png" alt="Rock the Facts!" onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='block';" />
-      <div class="logo-fallback">Rock<br>The<br>Facts!</div>
+      <img class="logo-img" src="rock-logo.png" alt="Rock the Facts!" />
       <div class="brand-subtitle">A Tim Bedley<br>Learning Game</div>
     </section>
 
