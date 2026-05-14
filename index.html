@@ -261,13 +261,13 @@
         appearance: none;
       }
 
-      /* Game board — centered, sized to fit board+factors within viewport height */
+      /* Game board — shifted left to give characters room on the right */
       .game-stage {
         position: absolute;
-        left: 50%;
+        left: 38%;
         top: 50%;
         transform: translate(-50%, -48%);
-        width: min(44vw, 60vh, 680px);
+        width: min(42vw, 60vh, 660px);
         z-index: 5;
         display: flex;
         flex-direction: column;
@@ -281,9 +281,9 @@
 
       .kids-img {
         position: absolute;
-        right: clamp(4px, 1.2vw, 22px);
-        bottom: clamp(40px, 6vh, 90px);
-        width: clamp(480px, 52vw, 840px);
+        right: clamp(4px, 1vw, 16px);
+        bottom: 0;
+        width: clamp(300px, 34vw, 540px);
         z-index: 4;
         filter: drop-shadow(0 18px 18px rgba(0,0,0,.65));
         pointer-events: none;
