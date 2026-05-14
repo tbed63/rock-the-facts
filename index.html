@@ -261,12 +261,12 @@
         appearance: none;
       }
 
-      /* Game board — shifted left to give characters room on the right */
+      /* Game board — right edge sits just past screen center */
       .game-stage {
         position: absolute;
-        left: 38%;
+        left: 55%;
         top: 50%;
-        transform: translate(-50%, -48%);
+        transform: translate(-75%, -48%);
         width: min(42vw, 60vh, 660px);
         z-index: 5;
         display: flex;
@@ -282,7 +282,8 @@
       .kids-img {
         position: absolute;
         right: clamp(4px, 1vw, 16px);
-        bottom: 0;
+        top: 50%;
+        transform: translateY(-50%);
         width: clamp(300px, 34vw, 540px);
         z-index: 4;
         filter: drop-shadow(0 18px 18px rgba(0,0,0,.65));
