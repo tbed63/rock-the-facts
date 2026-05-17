@@ -34,6 +34,8 @@
         radial-gradient(circle at 55% 105%, rgba(168,85,247,.18), transparent 38%),
         linear-gradient(135deg, #03040b 0%, #08091a 42%, #050612 100%);
       overflow: hidden;
+      /* Allow pull-to-refresh on mobile */
+      overscroll-behavior-y: auto;
     }
 
     body::before {
@@ -385,6 +387,9 @@
         width: 100vw; height: 100dvh;
         display: flex; flex-direction: column;
         align-items: center; overflow: hidden;
+        /* Allow native pull-to-refresh gesture */
+        overscroll-behavior-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       /* ── TOP BAR: timer | mode | new game | rules ── */
