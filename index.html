@@ -452,38 +452,50 @@
 
       /* ── LOGO + KIDS ROW above board ── */
       /* This row takes ~20% of the available game height */
+      /* Logo row: logo left, kids right — kids cropped mid-chest to top */
       .mobile-logo-row {
         width: 100%;
         display: flex !important;
-        align-items: flex-end;
+        align-items: center;
+        justify-content: space-between;
         position: relative;
-        /* height = ~20% of viewport minus topbar */
-        height: clamp(60px, 18vh, 130px);
+        height: clamp(72px, 20vw, 110px);
         flex-shrink: 0;
-        margin-bottom: clamp(3px, .6vh, 7px);
-        overflow: visible;
+        margin-bottom: clamp(4px, .8vh, 8px);
+        overflow: hidden;
+        padding: 0 4px;
       }
 
-      /* Rock the Facts logo fills left ~55% */
+      /* Rock the Facts logo — left half, fills row height */
       .mob-rtf-logo {
         height: 100%;
-        width: 55%;
+        width: auto;
+        max-width: 52%;
         object-fit: contain;
-        object-position: left bottom;
+        object-position: left center;
         filter: drop-shadow(0 4px 10px rgba(0,0,0,.6));
         flex-shrink: 0;
         position: relative; z-index: 3;
       }
 
-      /* Kids fill right portion, taller so they peek above board */
+      /* Kids wrapper — right half, clips vertically */
+      .kids-mobile-wrap {
+        width: 48%;
+        height: 100%;
+        overflow: hidden;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      /* Kids image — 2x taller than wrapper so only top half (faces) shows */
       .kids-mobile {
         position: absolute;
-        right: -2%;
-        bottom: 0;
-        height: 195%;  /* taller than logo row so they extend above the board */
+        top: 0;
+        right: 0;
+        height: 210%;
         width: auto;
-        z-index: 6;    /* above board-frame */
-        filter: drop-shadow(0 6px 12px rgba(0,0,0,.6));
+        object-position: right top;
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,.6));
         pointer-events: none;
       }
 
@@ -541,6 +553,59 @@
     /* ══════════════════════════════════════
        OVERLAYS
     ══════════════════════════════════════ */
+    /* Time-up overlay — separate from wrong answer */
+    .timeup-overlay {
+      position: fixed; inset: 0; display: none; place-items: center;
+      background: rgba(0,0,0,.65); z-index: 4100; backdrop-filter: blur(4px);
+    }
+    .timeup-overlay.show { display: grid; }
+    .timeup-card {
+      background: linear-gradient(135deg, #1a0a1a, #2a0a2a);
+      border: 3px solid var(--red);
+      border-radius: 20px;
+      padding: clamp(22px, 4vw, 40px) clamp(28px, 5vw, 56px);
+      text-align: center;
+      box-shadow: 0 0 48px rgba(255,45,85,.5), 0 20px 60px rgba(0,0,0,.8);
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      max-width: min(420px, calc(100vw - 32px));
+    }
+    .timeup-icon {
+      font-family: Impact, 'Arial Narrow Bold', sans-serif;
+      font-size: clamp(3rem, 10vw, 6rem);
+      line-height: 1;
+      color: var(--red);
+      text-shadow: 0 0 24px rgba(255,45,85,.8), 4px 4px 0 #000;
+    }
+    .timeup-main {
+      font-family: Impact, 'Arial Narrow Bold', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.8rem);
+      color: var(--yellow);
+      text-shadow: 3px 3px 0 #000, 0 0 16px rgba(255,230,109,.5);
+      line-height: 1.1; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .timeup-sub {
+      font-family: Impact, 'Arial Narrow Bold', sans-serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+      text-transform: uppercase;
+    }
+    .timeup-continue {
+      margin-top: 6px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 800; font-size: clamp(.85rem, 1.8vw, 1.1rem);
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--yellow);
+      background: rgba(255,45,85,.2);
+      border: 2px solid var(--red) !important;
+      border-radius: 12px;
+      padding: 10px 32px;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(255,45,85,.3);
+      transition: transform .12s, box-shadow .12s;
+    }
+    .timeup-continue:hover { transform: scale(1.05); box-shadow: 0 0 28px rgba(255,45,85,.5); }
+
     .wrong-overlay {
       position: fixed; inset: 0; display: none; place-items: center;
       background: rgba(0,0,0,.52); z-index: 4000; backdrop-filter: blur(3px);
@@ -686,7 +751,9 @@
       <!-- Mobile: logo row (logo left, kids right) -->
       <div class="mobile-logo-row" style="display:none">
         <img class="mob-rtf-logo" src="rock-logo.png" alt="Rock the Facts!" />
-        <img class="kids-mobile"  src="rocker-kids.png" alt="Kid rockers" />
+        <div class="kids-mobile-wrap">
+          <img class="kids-mobile" src="rocker-kids.png" alt="Kid rockers" />
+        </div>
       </div>
 
       <!-- Board -->
@@ -723,6 +790,16 @@
 
 </div><!-- .screen -->
 
+
+<!-- TIME-UP OVERLAY -->
+<div class="timeup-overlay" id="timeupOverlay" aria-hidden="true">
+  <div class="timeup-card">
+    <div class="timeup-icon">⏰</div>
+    <div class="timeup-main">You're out of time!</div>
+    <div class="timeup-sub" id="timeupSub">Red loses their turn</div>
+    <button class="timeup-continue" id="timeupContinue">Continue</button>
+  </div>
+</div>
 
 <!-- WRONG OVERLAY -->
 <div class="wrong-overlay" id="wrongOverlay" aria-hidden="true">
@@ -888,15 +965,14 @@ function startTurnTimer() {
       if (gameOver) return;
       await unlockAudio();
       playWrongSound();
-      showWrongX();
       const missed = currentPlayer;
       lastMoveSet = { a: clipA, b: clipB };
       currentPlayer = currentPlayer === 1 ? 2 : 1;
       hasMovedThisTurn = false;
       updateUI();
-      setMessage(`Time's up! ${playerName(missed)} loses their turn.`);
-      if (getMode() === 'computer' && currentPlayer === 2) setTimeout(computerMove, 2000);
-      else startTurnTimer();
+      setMessage(`Time’s up! ${playerName(missed)} loses their turn.`);
+      qs('#timeupSub').textContent = `${playerName(missed)} loses their turn`;
+      qs('#timeupOverlay').classList.add('show');
     }
   }, 1000);
 }
@@ -1099,6 +1175,7 @@ function possibleMoves() {
 
 function computerMove() {
   if (gameOver) return;
+  if (isFirstTurn()) { setMessage('Choose two factors to begin.'); return; }
   const moves = possibleMoves();
   if (!moves.length) { gameOver=true; stopTimer(); setMessage('No legal moves left. Game over!'); updateUI(); return; }
   let best=null;
@@ -1207,6 +1284,11 @@ qs('#modeD').addEventListener('change', init);
 qs('#modeM').addEventListener('change', init);
 qs('#winNewGame').addEventListener('click', showWelcome);
 qs('#closeRules').addEventListener('click', ()=>rulesOverlay.classList.remove('show'));
+qs('#timeupContinue').addEventListener('click', () => {
+  qs('#timeupOverlay').classList.remove('show');
+  if (getMode() === 'computer' && currentPlayer === 2) setTimeout(computerMove, 800);
+  else startTurnTimer();
+});
 rulesOverlay.addEventListener('click', e=>{ if(e.target===rulesOverlay) rulesOverlay.classList.remove('show'); });
 
 applyLayout();
