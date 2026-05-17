@@ -351,13 +351,12 @@
         min-height: 20px;
       }
 
-      /* Kids image — right side, vertically centered */
+      /* Kids image — right side, vertically centered, shifted left toward board */
       .kids-desktop {
         position: absolute;
-        right: 0;
+        right: -4vw;
         top: 50%;
         transform: translateY(-50%);
-        /* ~34vw wide so they fill the right column without overlapping the board */
         width: clamp(280px, 34vw, 520px);
         z-index: 4;
         filter: drop-shadow(0 16px 16px rgba(0,0,0,.65));
@@ -500,44 +499,38 @@
       }
 
       /* ── BOARD ──
-         Key insight: on a ~390px wide phone,
-           topbar      ~52px
-           logo row    ~90px  + 8px margin
-           board       = X
-           gap         8px
-           factor row1 ~38px
-           factor row2 ~38px
-           gap         8px
-           below row   ~52px (zoodle + text)
-           bottom pad  10px
-         Total fixed = 52+90+8+8+38+38+8+52+10 = 304px
-         Remaining for board = 100dvh - 304px
-         We use that as max-height and keep width=100% with overflow:hidden
+         Explicit pixel heights for each fixed element on a portrait phone:
+           topbar:     52px
+           logo row:   90px + 8px margin-bottom
+           board:      THIS (calculated)
+           gap:        8px (margin-bottom on board-wrap)
+           factor x2:  40px each + 9px gap between + 9px padding each = ~107px total
+           below row:  56px + 10px padding-bottom = 66px
+         Fixed total (excl board): 52+98+8+107+66 = 331px
+         Board size = min(100vw, 100dvh - 331px)
+         We set both width and height explicitly to this value.
       */
       .mobile-board-wrap {
         width: 100%;
         position: relative;
-        flex-shrink: 1;
+        flex-shrink: 0;
         margin-bottom: 8px;
-        /* Constrain board height so it never clips its bottom row */
-        max-height: calc(100dvh - 304px);
+      }
+
+      .mobile-board-wrap .board-frame {
+        /* Square: whichever is smaller — full width or remaining height */
+        width: min(100%, calc(100dvh - 331px));
+        height: min(100vw, calc(100dvh - 331px));
+        aspect-ratio: unset;
+        margin: 0 auto;
         overflow: hidden;
       }
 
-      /* Board fills wrap width; height capped by parent max-height */
-      .board-frame {
-        width: 100%;
-        /* Use the smaller of: full width (square) or the max available height */
-        max-height: calc(100dvh - 304px);
-        aspect-ratio: 1 / 1;
-        overflow: hidden;
-      }
-
-      /* Tighter internals so all 6 rows render fully inside the frame */
-      .mobile-board-wrap .board-frame { padding: clamp(3px, .5vw, 5px); }
-      .mobile-board-wrap .grid { gap: clamp(2px, .35vw, 3px); }
+      /* Tighter internals so all 6 rows sit comfortably inside the frame */
+      .mobile-board-wrap .board-frame { padding: 4px; }
+      .mobile-board-wrap .grid { gap: 3px; }
       .mobile-board-wrap .cell {
-        border-radius: clamp(5px, .7vw, 8px);
+        border-radius: 7px;
         border-width: 1px;
       }
 
@@ -555,7 +548,7 @@
         display: flex !important;
         align-items: center; justify-content: space-between;
         gap: 8px; flex-shrink: 0;
-        padding-bottom: clamp(10px, 2.5vh, 22px);
+        padding-bottom: 10px;
       }
 
       .mobile-message {
