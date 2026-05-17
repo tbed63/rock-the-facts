@@ -499,24 +499,45 @@
         pointer-events: none;
       }
 
-      /* ── BOARD ── */
+      /* ── BOARD ──
+         Key insight: on a ~390px wide phone,
+           topbar      ~52px
+           logo row    ~90px  + 8px margin
+           board       = X
+           gap         8px
+           factor row1 ~38px
+           factor row2 ~38px
+           gap         8px
+           below row   ~52px (zoodle + text)
+           bottom pad  10px
+         Total fixed = 52+90+8+8+38+38+8+52+10 = 304px
+         Remaining for board = 100dvh - 304px
+         We use that as max-height and keep width=100% with overflow:hidden
+      */
       .mobile-board-wrap {
         width: 100%;
         position: relative;
-        flex-shrink: 0;
-        /* Small gap between board and factor rows */
-        margin-bottom: clamp(5px, 1.2vh, 10px);
+        flex-shrink: 1;
+        margin-bottom: 8px;
+        /* Constrain board height so it never clips its bottom row */
+        max-height: calc(100dvh - 304px);
+        overflow: hidden;
       }
 
-      /* Board uses aspect-ratio but cells are shrunk via smaller gap/padding
-         so all 6 rows of numbers fit without clipping */
-      .board-frame { width: 100%; aspect-ratio: 1 / 1; }
+      /* Board fills wrap width; height capped by parent max-height */
+      .board-frame {
+        width: 100%;
+        /* Use the smaller of: full width (square) or the max available height */
+        max-height: calc(100dvh - 304px);
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+      }
 
-      /* Smaller cell gaps and padding inside the board on mobile */
+      /* Tighter internals so all 6 rows render fully inside the frame */
       .mobile-board-wrap .board-frame { padding: clamp(3px, .5vw, 5px); }
-      .mobile-board-wrap .grid { gap: clamp(2px, .4vw, 4px); }
+      .mobile-board-wrap .grid { gap: clamp(2px, .35vw, 3px); }
       .mobile-board-wrap .cell {
-        border-radius: clamp(5px, .7vw, 9px);
+        border-radius: clamp(5px, .7vw, 8px);
         border-width: 1px;
       }
 
@@ -524,7 +545,7 @@
       .factor-area {
         width: 100%;
         flex-shrink: 0;
-        margin-bottom: clamp(5px, 1vh, 9px);
+        margin-bottom: 8px;
       }
       .factor { min-height: clamp(24px, 4.5vw, 40px); font-size: clamp(.9rem, 3.5vw, 1.6rem); }
 
@@ -534,7 +555,7 @@
         display: flex !important;
         align-items: center; justify-content: space-between;
         gap: 8px; flex-shrink: 0;
-        padding-bottom: clamp(8px, 2vh, 18px);
+        padding-bottom: clamp(10px, 2.5vh, 22px);
       }
 
       .mobile-message {
