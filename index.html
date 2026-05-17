@@ -502,16 +502,29 @@
       /* ── BOARD ── */
       .mobile-board-wrap {
         width: 100%;
-        position: relative; /* kids-mobile is absolute relative to logo-row, not this */
+        position: relative;
         flex-shrink: 0;
+        /* Small gap between board and factor rows */
+        margin-bottom: clamp(5px, 1.2vh, 10px);
       }
+
+      /* Board uses aspect-ratio but cells are shrunk via smaller gap/padding
+         so all 6 rows of numbers fit without clipping */
       .board-frame { width: 100%; aspect-ratio: 1 / 1; }
+
+      /* Smaller cell gaps and padding inside the board on mobile */
+      .mobile-board-wrap .board-frame { padding: clamp(3px, .5vw, 5px); }
+      .mobile-board-wrap .grid { gap: clamp(2px, .4vw, 4px); }
+      .mobile-board-wrap .cell {
+        border-radius: clamp(5px, .7vw, 9px);
+        border-width: 1px;
+      }
 
       /* ── FACTOR ROWS ── */
       .factor-area {
         width: 100%;
-        margin-top: clamp(4px, .8vh, 8px);
         flex-shrink: 0;
+        margin-bottom: clamp(5px, 1vh, 9px);
       }
       .factor { min-height: clamp(24px, 4.5vw, 40px); font-size: clamp(.9rem, 3.5vw, 1.6rem); }
 
@@ -520,9 +533,8 @@
         width: 100%;
         display: flex !important;
         align-items: center; justify-content: space-between;
-        margin-top: clamp(4px, .8vh, 8px);
         gap: 8px; flex-shrink: 0;
-        padding-bottom: clamp(4px, 1vh, 10px);
+        padding-bottom: clamp(8px, 2vh, 18px);
       }
 
       .mobile-message {
@@ -534,7 +546,7 @@
       }
 
       .zoodle-mobile {
-        height: clamp(28px, 7vw, 50px);
+        height: clamp(52px, 14vw, 90px);
         width: auto;
         filter: drop-shadow(0 3px 6px rgba(0,0,0,.55));
         flex-shrink: 0;
